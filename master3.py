@@ -443,8 +443,8 @@ def main():
             if choice.lower() == "t":
                 pause()
 
-          #  elif choice == "0":
-          #      login_with_refresh_token()
+            elif choice == "0":
+                login_with_refresh_token()
 
             elif choice == "1":
                 selected_user_number = show_account_menu()
@@ -510,7 +510,7 @@ def main():
                 continue
             elif choice == "10":
                 unlock_code = console.input(f"[{theme['text_sub']}]Masukkan kode unlock:[/{theme['text_sub']}] ").strip()
-                if unlock_code != "barbex":
+                if unlock_code != "xxxx":
                     print_panel("Kesalahan", "Kode unlock salah, akses ditolak.")
                     pause()
                     continue
