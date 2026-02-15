@@ -400,8 +400,8 @@ def main():
             if choice.lower() == "t":
                 pause()
 
-          #  elif choice == "0":
-          #      login_with_refresh_token()
+            elif choice == "0":
+                login_with_refresh_token()
 
             elif choice == "1":
                 selected_user_number = show_account_menu()
