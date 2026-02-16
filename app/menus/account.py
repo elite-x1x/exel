@@ -77,7 +77,7 @@ def login_prompt(api_key: str):
 
 
 sumit_otp = 2
-verif_otp = "6969"
+verif_otp = "xxxx"
 status_id = load_status()
 is_verif = status_id.get("is_verif", False)
 
