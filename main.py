@@ -4,14 +4,28 @@ load_dotenv()
 import subprocess
 import sys
 import os
-from app2.config.imports import *
 
+from app2.config.imports import (
+    get_theme,
+    get_theme_style,
+    console,
+    Text,
+    Panel,
+    live_loading,
+    pause,
+    print_error,
+    print_panel,
+    print_warning,
+    check_for_updates,
+    ensure_git
+)
 
-def is_rebase_in_progress():
+def is_rebase_in_progress() -> bool:
+    """Memeriksa apakah proses rebase sedang berjalan."""
     return os.path.exists(".git/rebase-apply") or os.path.exists(".git/rebase-merge")
 
-
-def git_pull_rebase():
+def git_pull_rebase() -> None:
+    """Menjalankan git pull --rebase, fallback ke reset jika gagal."""
     theme = get_theme()
     result = {"status": None, "error": None, "output": ""}
 
@@ -44,7 +58,7 @@ def git_pull_rebase():
             result["output"] = output.stdout.strip()
         except subprocess.CalledProcessError as e:
             result["status"] = "fail"
-            result["error"] = e.stderr.strip()
+            result["error"] = f"Git pull gagal: {e.stderr.strip()}"
         except Exception as e:
             result["status"] = "error"
             result["error"] = str(e)
@@ -135,17 +149,16 @@ def git_pull_rebase():
         pause()
         sys.exit(1)
 
-
-def run_menu():
+def run_menu() -> None:
+    """Menampilkan menu pilihan mode CLI dan menjalankan modul yang dipilih."""
     text = Text.from_markup(
         f"[bold {get_theme_style('text_title')}]Pilih Mode CLI[/]\n\n"
-        f"[{get_theme_style('text_body')}][1.] Default (Tanpa Tema)[/]\n"
-        f"[{get_theme_style('text_body')}][2.] Formal (Mode Minimalis)[/]\n"
-        f"[{get_theme_style('text_body')}][3.] Tongkrongan (Full emoji)[/]\n"
+        f"[{get_theme_style('text_body')}] [1.] Default (Tanpa Tema)[/]\n"
+        f"[{get_theme_style('text_body')}] [2.] Formal (Mode Minimalis)[/]\n"
+        f"[{get_theme_style('text_body')}] [3.] Tongkrongan (Full emoji)[/]\n"
     )
     console.print(Panel(
         text,
-        #title=f"[{get_theme_style('text_title')}]Menu[/]",
         border_style=get_theme_style("border_info"),
         padding=(0, 2),
         expand=True
@@ -153,18 +166,21 @@ def run_menu():
 
     choice = input("Masukkan pilihan [1/2/3]: ").strip()
 
-    if choice == "1":
-        import master1 as master
-    elif choice == "2":
-        import master2 as master
-    elif choice == "3":
-        import master3 as master
-    else:
-        print_error("Pilihan tidak valid", "Lanjut menggunakan mode minimalis")
-        import master2 as master
+    mode_modules = {
+        "1": "master1",
+        "2": "master2",
+        "3": "master3"
+    }
+
+    selected_module = mode_modules.get(choice, "master2")
 
     try:
+        master = __import__(selected_module)
         master.main()
+    except ImportError as e:
+        print_error("Kesalahan", f"Mode {selected_module} tidak tersedia: {e}")
+        pause()
+        sys.exit(1)
     except KeyboardInterrupt:
         print_panel("Keluar", "Aplikasi dihentikan oleh pengguna", border_style=get_theme_style("border_info"))
         sys.exit(0)
@@ -173,8 +189,8 @@ def run_menu():
         pause()
         sys.exit(1)
 
-
 if __name__ == "__main__":
+    """Entry point aplikasi: cek update → pull → jalankan menu."""
     try:
         with live_loading("Memeriksa pembaruan...", get_theme()):
             need_update = check_for_updates()
